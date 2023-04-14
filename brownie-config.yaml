@@ -1,0 +1,24 @@
+dependencies:
+  - OpenZeppelin/openzeppelin-contracts@4.5.0
+  - smartcontractkit/chainlink-brownie-contracts@1.1.1
+compiler:
+  solc:
+    remappings:
+      - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.5.0"
+      - "@chainlink=smartcontractkit/chainlink-brownie-contracts@1.1.1"
+dotenv: .env
+wallets:
+  from_key: ${PRIVATE_KEY}
+networks:
+  development:
+    verify: False
+  ganache:
+    verify: False
+  kovan:
+    verify: False
+  goerli:
+    verify: False
+  sepolia:
+    verify: False
+  
+
