@@ -3,6 +3,15 @@ from brownie import nftCert, network, config, web3
 import yaml, json
 import os ,shutil
 
+def get_abi(contract):
+    contract_data = contract._build
+    return contract_data["abi"]
+
+def save_abi_to_file(contract, file_name):
+    abi = get_abi(contract)
+    with open(file_name, 'w') as outfile:
+        json.dump(abi, outfile, indent=2)
+
 def deploy():
     account = get_account()
     deploy_gas_estimate = nftCert.deploy.estimate_gas({"from": account})
@@ -10,7 +19,9 @@ def deploy():
     nft = nftCert.deploy(
         {"from": account, "gas_limit": 5000000}, publish_source = config["networks"][network.show_active()]["verify"]
     )
-    print(f'your contract deployed at {nft}')
+    print(f'your contract deployed at {nft.address}')
+    save_abi_to_file(nft, "abiFile.json")
+    save_abi_to_file(nft, "front_end/abiFile.json")
     #update_front_end()
     return nft
 
@@ -30,3 +41,4 @@ def deploy():
 
 def main():
     deploy()
+

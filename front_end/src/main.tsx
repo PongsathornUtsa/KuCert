@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 
 import { WagmiConfig, configureChains, createClient } from 'wagmi'
-import { mainnet, sepolia } from 'wagmi/chains'
+import { mainnet, sepolia, goerli } from 'wagmi/chains'
 import { publicProvider } from 'wagmi/providers/public'
 import { getDefaultWallets, RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit'
 
@@ -11,7 +11,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 import './index.css'
 
 const { chains, provider } = configureChains(
-  [mainnet, sepolia],
+  [mainnet, sepolia, goerli],
   [publicProvider()]
 )
 
@@ -21,7 +21,7 @@ const { connectors } = getDefaultWallets({
 })
 
 const wagmiClient = createClient({
-  autoConnect: false,
+  autoConnect: true,
   connectors,
   provider,
 })
@@ -29,10 +29,9 @@ const wagmiClient = createClient({
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains} theme={lightTheme ({
+      <RainbowKitProvider coolMode chains={chains} theme={lightTheme ({
         accentColor: '#046b63',
         accentColorForeground: 'white',
-        borderRadius: 'small',
         fontStack: 'system',
         overlayBlur: 'small',
       })}>
