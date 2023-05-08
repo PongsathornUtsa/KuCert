@@ -6,6 +6,5 @@ metadata_template = \
         "certificate_authority_name": "",
         "degree_title": "",
         "degree_conferral_date": "",
-        "certificate_URI": "",
     },
 }
