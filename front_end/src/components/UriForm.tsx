@@ -10,7 +10,7 @@ import ContractInterface from "../../abiFile.json";
 import { ChangeEvent } from 'react';
 
 const MintForm = () => {
-  const CONTRACT_ADDRESS = "0x7669e285eD9c218911ebC9A696575A8980434ccA";
+  const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;;
   const provider = useProvider();
 
   const [mintTokenURI, setMintTokenURI] = useState("");
@@ -21,6 +21,9 @@ const MintForm = () => {
     address: CONTRACT_ADDRESS,
     functionName: "tokenCounter",
     watch: true,
+    onError(error) {
+      console.log('Please connect to wallet')
+    },
   });
 
   useEffect(() => {
@@ -36,6 +39,9 @@ const MintForm = () => {
     functionName: "mint",
     args: [mintTokenURI],
     enabled: mintTokenURI.length > 0,
+    onError(error) {
+      console.log('Error mint')
+    },
   });
 
   const { data: mintData, error, isError, write } = useContractWrite(contractWriteConfig);
@@ -43,28 +49,35 @@ const MintForm = () => {
   const { isSuccess: txSuccess } = useWaitForTransaction({ hash: mintData?.hash });
 
   const [etherscanUrl, setEtherscanUrl] = useState("");
+  const [openSeaUrl, setOpenSeaUrl] = useState("");
 
   useEffect(() => {
     const displayEtherscanLink = async () => {
       if (txSuccess) {
         const network = await provider.getNetwork();
         let etherscanUrl = "";
+        let openSeaUrl = "";
 
         switch (network.chainId) {
           case 1: // Mainnet
             etherscanUrl = `https://etherscan.io/tx/${mintData?.hash}`;
+            openSeaUrl = `https://opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId}`;
             break;
           case 5: // Goerli
             etherscanUrl = `https://goerli.etherscan.io/tx/${mintData?.hash}`;
+            openSeaUrl = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId}`;
             break;
           case 11155111: // Sepolia
             etherscanUrl = `https://sepolia.etherscan.io/tx/${mintData?.hash}`;
+            openSeaUrl = "OpenSea link not available";
             break;
           default:
             etherscanUrl = "Etherscan link not available";
+            openSeaUrl = "OpenSea link not available";
         }
 
         setEtherscanUrl(etherscanUrl);
+        setOpenSeaUrl(openSeaUrl);
       }
     };
 
@@ -84,10 +97,8 @@ const MintForm = () => {
         console.log("Token URI not found or not set");
       }
     },
-    enabled: false,
+    enabled: !!(tokenId),
   });
-  
-  
 
   const handleTokenIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTokenId(e.target.value);
@@ -107,12 +118,14 @@ const MintForm = () => {
       console.log("Token URI not found or not set");
     }
   };
-  
 
   const { data: universityRole } = useContractRead({
     abi: ContractInterface,
     address: CONTRACT_ADDRESS,
     functionName: "UNIVERSITY_ROLE",
+    onError(error) {
+      console.log('Error role Please connect to walltet')
+    },
   });
 
   const [selectedRole, setSelectedRole] = useState(universityRole);
@@ -176,9 +189,6 @@ const MintForm = () => {
 
   const { write: revokeRoleWrite } = useContractWrite(revokeRoleConfig);
 
-
-
-
   return (
     <div>
       <form className="form" onSubmit={(e) => { e.preventDefault() }}>
@@ -198,15 +208,20 @@ const MintForm = () => {
         {isError && <div>Error: {error?.message}</div>}
 
         {txSuccess && (
-          <div style={{ marginTop: "1rem" }}>
-            Successfully minted your NFT!
-            <div>
-              <a href={etherscanUrl} target="_blank" rel="noopener noreferrer">
-                View on Etherscan
-              </a>
-            </div>
+        <div style={{ marginTop: "1rem" }}>
+          Successfully minted your NFT!
+          <div>
+            <a href={etherscanUrl} target="_blank" rel="noopener noreferrer">
+              View on Etherscan
+            </a>
           </div>
-        )}
+          <div>
+            <a href={openSeaUrl} target="_blank" rel="noopener noreferrer">
+              View on OpenSea
+            </a>
+          </div>
+        </div>
+      )}
 
         <input
           className="form-input"

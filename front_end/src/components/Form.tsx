@@ -1,6 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import {
+  useProvider,
+  usePrepareContractWrite,
+  useContractWrite,
+  useContractRead,
+  useWaitForTransaction,
+  useAccount
+} from "wagmi";
+import ContractInterface from "../../abiFile.json";
 
 type FormData = {
   name: string;
@@ -25,8 +34,8 @@ type FormProps = {
   setPreview: (preview: boolean) => void;
 };
 
-const PINATA_API_KEY = "3dfd64b3d6ca31560fa4";
-const PINATA_API_SECRET = "f7510a6ef4e8af5668885123ad2274643130d0efd42a2640528b2d397fc82a35";
+const PINATA_API_KEY = import.meta.env.VITE_PINATA_API_KEY;
+const PINATA_API_SECRET = import.meta.env.VITE_PINATA_API_SECRET;
 
 const Form: React.FC<FormProps> = ({ setMetadata, setPreview }) => {
   const {
@@ -35,6 +44,10 @@ const Form: React.FC<FormProps> = ({ setMetadata, setPreview }) => {
     formState: { errors },
     getValues,
   } = useForm<FormData>();
+
+  const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+
+  const { address: account, isConnecting } = useAccount();
 
   const [tokenURI, setTokenURI] = useState("");
 
@@ -108,37 +121,59 @@ const Form: React.FC<FormProps> = ({ setMetadata, setPreview }) => {
     });
     setPreview(true);
   };
+  const { data: universityRole } = useContractRead({
+    abi: ContractInterface,
+    address: CONTRACT_ADDRESS,
+    functionName: "UNIVERSITY_ROLE",
+  });
+
+  const { data: hasUniversityRole } = useContractRead({
+    abi: ContractInterface,
+    address: CONTRACT_ADDRESS,
+    functionName: "hasRole",
+    args: [universityRole, account],
+  });
+
+  const [submitEnabled, setSubmitEnabled] = useState(false);
+
+  useEffect(() => {
+    if (hasUniversityRole !== undefined && hasUniversityRole !== null && !isConnecting) {
+      setSubmitEnabled(Boolean(hasUniversityRole));
+    } else {
+      setSubmitEnabled(false);
+    }
+  }, [hasUniversityRole, isConnecting]);
 
   return (
     <form className="form" onSubmit={onSubmit}>
       <h2>Please provide the data for NFT below</h2>
       <div className="form-row">
         <label className="form-label">Name:</label>
-        <input className="form-input" {...register("name", { required: true })} placeholder="Enter your name and surname"/>
+        <input className="form-input" {...register("name", { required: true })} placeholder="Enter your name and surname" />
         {errors.name && <p className="error-message">This field is required</p>}
       </div>
 
       <div className="form-row">
         <label className="form-label">University Name:</label>
-        <input className="form-input" {...register("university_name", { required: true })} placeholder="Enter your university name"/>
+        <input className="form-input" {...register("university_name", { required: true })} placeholder="Enter your university name" />
         {errors.university_name && <p className="error-message">This field is required</p>}
       </div>
 
       <div className="form-row">
         <label className="form-label">Student ID:</label>
-        <input className="form-input" {...register("student_id", { required: true })} placeholder="Enter your student id"/>
+        <input className="form-input" {...register("student_id", { required: true })} placeholder="Enter your student id" />
         {errors.student_id && <p className="error-message">This field is required</p>}
       </div>
 
       <div className="form-row">
         <label className="form-label">Issued Date:</label>
-        <input className="form-input" {...register("issued_date", { required: true })} placeholder="Enter issued date in dd/mm/yy"/>
+        <input className="form-input" {...register("issued_date", { required: true })} placeholder="Enter issued date in dd/mm/yy" />
         {errors.issued_date && <p className="error-message">This field is required</p>}
       </div>
 
       <div className="form-row">
         <label className="form-label">Signer:</label>
-        <input className="form-input" {...register("signer", { required: true })} placeholder="Enter the issuer name"/>
+        <input className="form-input" {...register("signer", { required: true })} placeholder="Enter the issuer name" />
         {errors.signer && <p className="error-message">This field is required</p>}
       </div>
 
@@ -147,9 +182,10 @@ const Form: React.FC<FormProps> = ({ setMetadata, setPreview }) => {
         <input {...register("image", { required: true })} type="file" />
         {errors.image && <p className="error-message">This field is required</p>}
       </div>
-      <button type="submit" className="btn btn-block">
+      <button type="submit" className="btn btn-block" disabled={!submitEnabled}>
         Submit
       </button>
+
       <button type="button" className="btn btn-block" onClick={onPreview}>
         Preview
       </button>

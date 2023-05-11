@@ -14,7 +14,7 @@ const SignMessage = () => {
   const [signature, setSignature] = useState("");
   const [retrieveTokenId, setRetrieveTokenId] = useState("");
 
-  const CONTRACT_ADDRESS = "0x7669e285eD9c218911ebC9A696575A8980434ccA";
+  const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 
   const { data, error, isLoading, signMessage } = useSignMessage({
     onSuccess(data, variables) {
@@ -30,6 +30,9 @@ const SignMessage = () => {
     functionName: "setCertificateSignature",
     args: [parseInt(tokenId, 10), signature],
     enabled: !!(tokenId && signature),
+    onError(error) {
+      console.log('Error set signature')
+    },
   });
 
 
@@ -41,14 +44,15 @@ const SignMessage = () => {
     abi: ContractInterface,
     functionName: "getCertificateSignature",
     args: retrieveTokenId ? [parseInt(retrieveTokenId, 10)] : undefined,
-    enabled: !!retrieveTokenId
+    enabled: !!retrieveTokenId,
+    onError(error) {
+      console.log('Error retrived')
+    },
   });
 
   useEffect(() => {
     if (retrievedSignature) {
       console.log(`Signature for token ID ${tokenId}: ${retrievedSignature}`);
-    } else {
-      console.log("No signature found");
     }
   }, [retrievedSignature, tokenId]);
 
@@ -66,9 +70,6 @@ const SignMessage = () => {
     if (retrievedSignature) {
       console.log(`Signature for token ID ${retrieveTokenId}: ${retrievedSignature}`);
       setDisplayedSignature(retrievedSignature as string);
-    } else {
-      console.log("No signature found");
-      setDisplayedSignature("");
     }
   }, [retrievedSignature, retrieveTokenId]);
 
