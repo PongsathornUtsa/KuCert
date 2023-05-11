@@ -10,7 +10,7 @@ import ContractInterface from "../../abiFile.json";
 import { ChangeEvent } from 'react';
 
 const MintForm = () => {
-  const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;;
+  const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
   const provider = useProvider();
 
   const [mintTokenURI, setMintTokenURI] = useState("");
