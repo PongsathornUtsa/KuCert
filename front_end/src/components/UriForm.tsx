@@ -97,7 +97,7 @@ const MintForm = () => {
         console.log("Token URI not found or not set");
       }
     },
-    enabled: !!(tokenId),
+    enabled: false,/*!!(tokenid)*/
   });
 
   const handleTokenIdChange = (e: ChangeEvent<HTMLInputElement>) => {

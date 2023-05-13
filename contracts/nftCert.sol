@@ -15,17 +15,9 @@ contract nftCert is ERC721URIStorage, AccessControl {
 
     mapping(uint256 => bytes) public certificateSignatures;
 
-    event CollectibleMinted(
-        uint256 indexed tokenId,
-        address indexed owner,
-        string tokenURI
-    );
+    event CollectibleMinted( uint256 indexed tokenId, address indexed owner, string tokenURI);
     event CertificateSignatureSet(uint256 indexed tokenId, bytes signature);
-    event UniversityTransfer(
-        uint256 indexed tokenId,
-        address indexed from,
-        address indexed to
-    );
+    event UniversityTransfer( uint256 indexed tokenId, address indexed from, address indexed to);
     event TokenURISet(uint256 indexed tokenId, string tokenURI);
 
     constructor() ERC721("KuCert", "KCRT") {
@@ -34,16 +26,13 @@ contract nftCert is ERC721URIStorage, AccessControl {
         _setupRole(UNIVERSITY_ROLE, msg.sender);
     }
 
-    function mint(
-        string memory _tokenURI
-    ) public onlyRole(UNIVERSITY_ROLE) returns (uint256) {
+    function mint( string memory _tokenURI ) public onlyRole(UNIVERSITY_ROLE) returns (uint256) {
         uint256 newTokenId = tokenCounter++;
         _safeMint(msg.sender, newTokenId);
 
         _setTokenURI(newTokenId, _tokenURI);
 
         emit CollectibleMinted(newTokenId, msg.sender, _tokenURI);
-
         return newTokenId;
     }
 
