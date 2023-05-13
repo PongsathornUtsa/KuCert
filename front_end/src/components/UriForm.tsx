@@ -85,24 +85,34 @@ const MintForm = () => {
   }, [txSuccess, mintData, provider]);
 
   const [tokenId, setTokenId] = useState("");
+  
+  const [prepareTokenURIRead, setPrepareTokenURIRead] = useState(false);
 
   const { data: returnedURI } = useContractRead({
     address: CONTRACT_ADDRESS,
     abi: ContractInterface,
     functionName: "tokenURI",
-    args: tokenId ? [parseInt(tokenId, 10)] : undefined, // Pass undefined if tokenId is not set
+    args: tokenId ? [parseInt(tokenId, 10)] : undefined,
     onError: (error) => {
       if (error.message.includes("ERC721URIStorage: URI query for nonexistent token")) {
         setDisplayedTokenURI("");
         console.log("Token URI not found or not set");
       }
     },
-    enabled: false,/*!!(tokenid)*/
+    enabled: prepareTokenURIRead,
   });
-
+  
   const handleTokenIdChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTokenId(e.target.value);
+    setPrepareTokenURIRead(true);
   };
+  
+  useEffect(() => {
+    if (returnedURI) {
+      setPrepareTokenURIRead(false);
+    }
+  }, [returnedURI]);
+  
 
   const [displayedTokenURI, setDisplayedTokenURI] = useState("");
 

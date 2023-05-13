@@ -4,6 +4,7 @@ import Form from "./components/Form";
 import UriForm from "./components/UriForm";
 import SignMessage from "./components/SignMessage";
 import VerifyMessage from "./components/VerifyMessage";
+import Transfer from "./components/Transfer";
 import { useProvider } from "wagmi";
 
 const App = () => {
@@ -83,6 +84,9 @@ const App = () => {
       </div>
       <div>
         <VerifyMessage />
+      </div>
+      <div>
+        <Transfer/>
       </div>
     </div>
   );
